@@ -28,20 +28,25 @@ void WifiConfigClass::begin(String *_ssid, String *_pass)
         Serial.println("Nothing in EEPROM");
     }
 }
-void WifiConfigClass::begin(String ap_ssid, String ap_pass)
+void WifiConfigClass::begin(String &ap_ssid, String &ap_pass)
 {
-    _ap_ssid = ap_ssid;
-    _ap_pass = ap_pass;
-    if (readEEPROM())
-    {
-        WiFi.mode(WIFI_AP_STA);
-        connect(*ssid, *pass);
-    }
-    else
-    {
-        softAP();
-        Serial.println("Nothing in EEPROM");
-    }
+    // _ap_ssid = ap_ssid;
+    // _ap_pass = ap_pass;
+    ssid = &ap_ssid;
+    pass = &ap_pass;
+    Serial.printf("[wifi_begin]%s|%s\r\n", (*ssid).c_str(), (*pass).c_str());
+    WiFi.begin(*ssid, *pass);
+    softAP();
+    // if (readEEPROM())
+    // {
+    //     WiFi.mode(WIFI_AP_STA);
+    //     connect(*ssid, *pass);
+    // }
+    // else
+    // {
+    //     softAP();
+    //     Serial.println("Nothing in EEPROM");
+    // }
 }
 
 bool WifiConfigClass::readEEPROM()

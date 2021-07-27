@@ -19,7 +19,7 @@ public:
     WifiConfigClass(void);
 
     void begin(String *_ssid, String *_pass);
-    void begin(String ap_ssid, String ap_pass);
+    void begin(String &ap_ssid, String &ap_pass);
     void connect(String ssid, String pass);
     String *ssid, *pass;
 

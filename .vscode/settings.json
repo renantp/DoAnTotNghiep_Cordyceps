@@ -35,7 +35,8 @@
         "tuple": "cpp",
         "utility": "cpp",
         "typeinfo": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "memory": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

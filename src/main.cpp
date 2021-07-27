@@ -1,6 +1,4 @@
 #include <Arduino.h>
-
-#include "FirebaseArduino.h"
 #include "RTClib.h"
 #include "SHT31.h"
 #include "LCD.h"
@@ -11,9 +9,14 @@
 #include "myEEPROM.h"
 #include "output_driver.h"
 #include <ESP8266HTTPClient.h>
+#include "FirebaseESP8266.h"
 
 HTTPClient http;
 String URL_TIME_API = "http://worldtimeapi.org/api/timezone/Asia/Ho_Chi_Minh";
+
+#define FIREBASE_HOST "cordycepsdata-2bf3a-default-rtdb.asia-southeast1.firebasedatabase.app"
+#define FIREBASE_AUTH "zErCXvWTYYYHdoNN7ZDzsZAigXhJpLsDRN1K5piw"
+// #define FIREBASE_AUTH ""
 
 #define _DEBUG
 
@@ -99,6 +102,10 @@ void h(uint8_t &val)
   val++;
   Serial.printf("\r\nVal: %u %u\r\n", val, a);
 }
+
+// FirebaseConfig FBConfig;
+// FirebaseAuth FBAuth;
+
 void setup()
 {
   // put your setup code here, to run once:
@@ -191,7 +198,10 @@ void setup()
   }
   EEPROM.begin(EEPROM_MAX);
   WiFi.disconnect();
-  WifiConfig.begin(&ssid, &pass);
+  // WifiConfig.begin(&ssid, &pass);
+  ssid = "Thao TPLINK";
+  pass = "05122601";
+  WifiConfig.begin(ssid, pass);
   Serial.printf("Connecting.");
   uint16_t timeout = 0;
 
@@ -206,6 +216,7 @@ void setup()
     printf(".");
     delay(1000);
   }
+
   Serial.println();
   server.on("/", mainPage_callback);
   server.on("/test", testPage);
@@ -246,6 +257,14 @@ void setup()
   OutputDriver.init(&myExpan, &ui);
   ui.updateRTC((time_t)rtc.now().unixtime());
   // Serial.printf("UI Time: %02i:%02i - %02i/%02i/%02d\r\n", ui.rtc_tm.tm_hour, ui.rtc_tm.tm_min, ui.rtc_tm.tm_mday, ui.rtc_tm.tm_mon + 1, ui.rtc_tm.tm_year + 1900);
+
+  // FBConfig.host = FIREBASE_HOST;
+  // FBConfig.api_key = FIREBASE_AUTH;
+  // FBAuth.user.email = "mymoneyoh@gmail.com";
+  // FBAuth.user.password = "mymoney1999";
+  // Firebase.begin(&FBConfig, &FBAuth);
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+  Firebase.reconnectWiFi(true);
 }
 bool GTECompare(float val, float set)
 {
@@ -343,11 +362,13 @@ JSONVar getRTCJson(void)
     // Serial.println(JSON.stringify(json_get));
     return json_get;
   }
-  Serial.printf("\r\n DS1307 update RTC \r\n");
+  // Serial.printf("\r\n DS1307 update RTC \r\n");
   ui.updateRTC((time_t)rtc.now().unixtime());
   Serial.printf("Code Error: %i \r\n", httpCodeGet);
   return json_get;
 }
+
+FirebaseData firebaseData;
 
 void loop()
 {
@@ -415,6 +436,40 @@ void loop()
 
   if (tk.time_flag.t5s)
   {
+    if (Firebase.setFloat(firebaseData, "/SHT31_AVRG/Temperature", ui.sht_avg.temp))
+    {
+      Serial.println("PASSED");
+      Serial.println("PATH: " + firebaseData.dataPath());
+      Serial.println("TYPE: " + firebaseData.dataType());
+      Serial.println("ETag: " + firebaseData.ETag());
+      Serial.println("------------------------------------");
+      Serial.println();
+    }
+    else
+    {
+      Serial.println("FAILED");
+      Serial.println("REASON: " + firebaseData.errorReason());
+      Serial.println("------------------------------------");
+      Serial.println();
+    }
+
+    if (Firebase.setFloat(firebaseData, "/SHT31_AVRG/Humidity", ui.sht_avg.humi))
+    {
+      Serial.println("PASSED");
+      Serial.println("PATH: " + firebaseData.dataPath());
+      Serial.println("TYPE: " + firebaseData.dataType());
+      Serial.println("ETag: " + firebaseData.ETag());
+      Serial.println("------------------------------------");
+      Serial.println();
+    }
+    else
+    {
+      Serial.println("FAILED");
+      Serial.println("REASON: " + firebaseData.errorReason());
+      Serial.println("------------------------------------");
+      Serial.println();
+    }
+
     if (ui._page == ST_DETAIL_TIME)
     {
       Serial.printf("UI Time: %02i:%02i - %02i/%02i/%02d\r\n", ui.rtc_tm.tm_hour, ui.rtc_tm.tm_min, ui.rtc_tm.tm_mday, ui.rtc_tm.tm_mon + 1, ui.rtc_tm.tm_year + 1900);
@@ -485,7 +540,7 @@ void loop()
     }
     if (rtc.isrunning())
     {
-      Serial.printf("\r\n DS1307 update RTC \r\n");
+      // Serial.printf("\r\n DS1307 update RTC \r\n");
       ui.updateRTC((time_t)rtc.now().unixtime());
     }
     // Serial.printf("UI RTC: %lu\r\n", ui.rtc);
