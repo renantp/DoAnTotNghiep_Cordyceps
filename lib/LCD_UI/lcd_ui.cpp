@@ -28,7 +28,7 @@ void LCD_UI::updateRTC(struct tm rtc_tm_struct)
     rtc = mktime(&rtc_tm);
 }
 
-void LCD_UI::begin(uint8_t *button, sht_31_t *sht_val, ui_setting_t *setting_val)
+void LCD_UI::begin(bool *button, sht_31_t *sht_val, ui_setting_t *setting_val)
 {
     bt = button;
     sht = sht_val;
@@ -1350,23 +1350,23 @@ void LCD_UI::output_setting_onchange_logic(uint8_t scroll_num)
     {
     case 0:
         _chooseOutput = &setting->output->relay_1;
-        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput);
+        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput, &output_state[0]);
         break;
     case 1:
         _chooseOutput = &setting->output->relay_2;
-        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput);
+        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput, &output_state[1]);
         break;
     case 2:
         _chooseOutput = &setting->output->out0;
-        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput);
+        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput, &output_state[2]);
         break;
     case 3:
         _chooseOutput = &setting->output->out1;
-        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput);
+        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput, &output_state[3]);
         break;
     case 4:
         _chooseOutput = &setting->output->out2;
-        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput);
+        output_setting_detail_onchange_logic(*scroll_p, _chooseOutput, &output_state[4]);
         break;
     default:
 
@@ -1375,7 +1375,7 @@ void LCD_UI::output_setting_onchange_logic(uint8_t scroll_num)
 }
 
 //Do the task has been choose in Detail
-void LCD_UI::output_setting_detail_onchange_logic(uint8_t scroll_num, st_output_config_t *out)
+void LCD_UI::output_setting_detail_onchange_logic(uint8_t scroll_num, st_output_config_t *out, bool *_output_state)
 {
     switch (scroll_num)
     {
@@ -1409,9 +1409,14 @@ void LCD_UI::output_setting_detail_onchange_logic(uint8_t scroll_num, st_output_
             // }
             // option("Used", _numOftheOnTime, true);
         }
+        else if (out->type == 6)
+        {
+            *_output_state = !*_output_state;
+            optionCustom("Output", "ON", "OFF", *_output_state);
+        }
         // else
         //     option("Cut off", out->current, true);
-        Serial.printf("[output_setting_detail_onchange_logic] %s\r\n", out->isHeater ? "change to Steam or Heater" : "change to Dryer or Cooler");
+        // Serial.printf("[output_setting_detail_onchange_logic] %s\r\n", out->isHeater ? "change to Steam or Heater" : "change to Dryer or Cooler");
         optional_view(scroll_num);
         // saveOutputSetting(setting);
         break;
@@ -1441,7 +1446,7 @@ void LCD_UI::output_setting_detail_onchange_logic(uint8_t scroll_num, st_output_
         }
         else if (out->type == 6)
         {
-            optionCustom("Output", "ON", "OFF", 1);
+            optionCustom("Output", "ON", "OFF", *_output_state);
         }
         // else
         //     option("Cut off", out->current, true);

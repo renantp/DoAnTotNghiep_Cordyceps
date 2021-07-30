@@ -110,10 +110,10 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  // delay(4000);
   h(a);
   Wire.begin();
   Wire.setClock(100000);
+
   // rtc begin
   if (!rtc.begin())
     Serial.println("Couldn't find RTC!");
@@ -136,61 +136,6 @@ void setup()
   if (myEEPROM.isConnected())
   {
     Serial.println("EEPROM conected!!");
-    // uint8_t ebuf[16] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0xab};
-    // myEEPROM.write(0x20, ebuf, 10);
-    // test_t returnStruct;
-
-    // uint8_t rt[3] = {0x00, 0x00, 0x00};
-
-    // myEEPROM.put(0x20, *test_p.p);
-    // myEEPROM.put(0x20, myStruct);
-
-    // myEEPROM.read(0x20, rt, 3);
-
-    //     test_t myStruct = {
-    //     .num1 = 0x25,
-    //     .num2 = 0xab,
-    //     .array1 = {0x01, 0x02, 0x03, 0x04, 0x05},
-    // };
-    // Serial.printf("Return 0x%02x, 0x%02x, 0x%02x, 0x%02x \r\n", rt[0], rt[1], rt[2], returnStruct.num1);
-    // Serial.printf("Return 0x%02x, 0x%02x, 0x%02x, 0x%02x \r\n", returnStruct.num1, returnStruct.num2, returnStruct.array1[0], returnStruct.array1[1]);
-    // Serial.printf("Return %05.2f \r\n", op_rt.relay_1.threshold.temp_h);
-
-    // st_output_t op_rt;
-    // st_output_config_t op1_rt;
-    // output_st.relay_1.threshold.temp_h = 99.99f;
-    // myEEPROM.put(0x02, output_st.relay_1);
-    // delay(500);
-    // myEEPROM.get(0x02, op1_rt);
-    // Serial.printf("Return %05.2f \r\n", op1_rt.threshold.temp_h);
-
-    // myEEPROM.put(0x02, op1_rt);
-    // delay(500);
-    // myEEPROM.get(0x02, op1_rt);
-    // Serial.printf("Return %05.2f \r\n", op1_rt.threshold.temp_h);
-
-    // myEEPROM.put(0x02, output_st);
-    // delay(500);
-    // myEEPROM.get(0x02, op_rt);
-    // Serial.printf("Return %05.2f \r\n", op_rt.relay_1.threshold.temp_h);
-
-    // myEEPROM.put(0x02, op_rt);
-    // delay(500);
-    // myEEPROM.get(0x02, op_rt);
-    // Serial.printf("Return %05.2f \r\n", op_rt.relay_1.threshold.temp_h);
-
-    // Serial.printf("Size of the output_setting %u \r\n", sizeof(output_st));
-    // ui_setting.output->relay_1.threshold.temp_h = ui_setting.output->relay_1.threshold.temp_l = 25.21f;
-    // ui_setting.output->relay_2.threshold.temp_h = ui_setting.output->relay_2.threshold.temp_l = 60.12f;
-    // Serial.printf("[setup] Relay 1: %5.02f %5.02f\r\n", ui_setting.output->relay_1.threshold.temp_h, ui_setting.output->relay_1.threshold.temp_l);
-    // Serial.printf("[setup] Relay 2: %5.02f %5.02f\r\n", ui_setting.output->relay_2.threshold.temp_h, ui_setting.output->relay_2.threshold.temp_l);
-    // myEEPROM.put(MY_EEPROM_OUTPUT_ADDRESS, output_st);
-    // delay(1000);
-    // myEEPROM.get(MY_EEPROM_OUTPUT_ADDRESS, *ui_setting.output);
-
-    // Serial.printf("Size of the output_config_setting %u \r\n", sizeof(output_st.relay1));
-
-    // Serial.printf("Return %05.2f \r\n", op_rt.relay_1.threshold.temp_h);
   }
   else
   {
@@ -256,13 +201,6 @@ void setup()
   rtc.now().unixtime();
   OutputDriver.init(&myExpan, &ui);
   ui.updateRTC((time_t)rtc.now().unixtime());
-  // Serial.printf("UI Time: %02i:%02i - %02i/%02i/%02d\r\n", ui.rtc_tm.tm_hour, ui.rtc_tm.tm_min, ui.rtc_tm.tm_mday, ui.rtc_tm.tm_mon + 1, ui.rtc_tm.tm_year + 1900);
-
-  // FBConfig.host = FIREBASE_HOST;
-  // FBConfig.api_key = FIREBASE_AUTH;
-  // FBAuth.user.email = "mymoneyoh@gmail.com";
-  // FBAuth.user.password = "mymoney1999";
-  // Firebase.begin(&FBConfig, &FBAuth);
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
   Firebase.reconnectWiFi(true);
 }

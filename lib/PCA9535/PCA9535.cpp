@@ -1,4 +1,7 @@
 #include "PCA9535.h"
+
+#define DEFAULT_PCA9535_ADDRESS (0x20)
+
 // #define _DEBUG
 bool isLT7(uint8_t t)
 {
@@ -36,10 +39,13 @@ bool PCA9535::begin(const uint8_t address, const uint8_t dataPin, const uint8_t 
     return true;
 }
 #endif
+bool PCA9535::begin(void)
+{
+    return begin(DEFAULT_PCA9535_ADDRESS, &Wire);
+}
 bool PCA9535::begin(const uint8_t address)
 {
     return begin(address, &Wire);
-    resetInvert();
 }
 bool PCA9535::begin(const uint8_t address, TwoWire *wire)
 {

@@ -8,10 +8,6 @@ UnixToTime::UnixToTime(time_t &tm)
 }
 DriverClass::DriverClass()
 {
-    for (int i = 0; i < 5; i++)
-    {
-        output[i] = 0;
-    }
 }
 UnixToTime DriverClass::toTime(time_t &unixtime)
 {
@@ -41,6 +37,10 @@ int DriverClass::init(PCA9535 *_PCA9535, LCD_UI *_ui)
     myExpan = _PCA9535;
     ui = _ui;
     FIRFilter_Init(&fir);
+    for (int i = 0; i < 5; i++)
+    {
+        ui->output_state[i] = ui->pre_output_state[i] = 0;
+    }
     return myExpan->begin(PCAA9535_DEFAULT_ADDRESS);
 }
 void DriverClass::UpdateDate(void)
@@ -57,11 +57,6 @@ void DriverClass::UpdateDate(void)
         updateTheDay(&ui->setting->output->out1.time_state[i].date_time[1]);
         updateTheDay(&ui->setting->output->out2.time_state[i].date_time[0]);
         updateTheDay(&ui->setting->output->out2.time_state[i].date_time[1]);
-        // toTime(ui->setting->output->relay_1.time_state[i].date_time[0]).hour();
-        // toTime(ui->setting->output->relay_2.time_state[i].date_time[0]);
-        // toTime(ui->setting->output->out0.time_state[i].date_time[0]);
-        // toTime(ui->setting->output->out1.time_state[i].date_time[0]);
-        // toTime(ui->setting->output->out2.time_state[i].date_time[0]);
     }
 }
 void DriverClass::loop(void)
@@ -90,8 +85,8 @@ void DriverClass::loop(void)
     //Do the current messuament
     CheckCurrent(ui->setting->output->relay_1);
     //
-    OutPutThresholdDrive(ui->setting->output->relay_1, &output[0], K1_PIN);
-    OutPutThresholdDrive(ui->setting->output->relay_2, &output[1], K2_PIN);
+    OutPutThresholdDrive(ui->setting->output->relay_1, &ui->output_state[0], &ui->pre_output_state[0], K1_PIN);
+    OutPutThresholdDrive(ui->setting->output->relay_2, &ui->output_state[1], &ui->pre_output_state[1], K2_PIN);
 }
 
 void DriverClass::outputThreshold(void)
@@ -100,11 +95,12 @@ void DriverClass::outputThreshold(void)
 }
 
 //Private-----------------------------------------------------------------------------------------------------------
-void DriverClass::OutPutThresholdDrive(st_output_config_t &output_config, uint8_t *output_state, uint8_t output_pin)
+void DriverClass::OutPutThresholdDrive(st_output_config_t &output_config, bool *output_state, bool *pre_output_state, uint8_t output_pin)
 {
     uint8_t state = *output_state;
     switch (output_config.type)
     {
+
     //Temperature Type
     case 0:
         //Heater turn on when below Low Threshold and turn off when above High Threshold
@@ -124,6 +120,7 @@ void DriverClass::OutPutThresholdDrive(st_output_config_t &output_config, uint8_
                 state = LOW;
         }
         break;
+
     //Humitidity Type
     case 1:
         //Steam turn on when below Low Threshold and turn off when above High Threshold
@@ -143,7 +140,8 @@ void DriverClass::OutPutThresholdDrive(st_output_config_t &output_config, uint8_
                 state = LOW;
         }
         break;
-        //Time Perodic Type
+
+    //Time Perodic Type
     case 2:
 
         //Loop through all time_state
@@ -177,6 +175,7 @@ void DriverClass::OutPutThresholdDrive(st_output_config_t &output_config, uint8_
             }
         }
         break;
+
     //Current Limit and Temperature type
     case 3:
         //Check the current
@@ -203,12 +202,22 @@ void DriverClass::OutPutThresholdDrive(st_output_config_t &output_config, uint8_
                 state = LOW;
         }
         break;
+
+    // Manual type
+    case 6:
+        if (*output_state != *pre_output_state)
+        {
+            *pre_output_state = state;
+            myExpan->digitalWrite(1, output_pin, *output_state);
+            Serial.println("Change output manual");
+        }
+        break;
     default:
         break;
     }
     if (state != *output_state)
     {
-        *output_state = state;
+        *output_state = *pre_output_state = state;
         myExpan->digitalWrite(1, output_pin, *output_state);
         Serial.printf("[OutPutThresholdDrive]Output %s", state == HIGH ? "ON" : "OFF");
     }

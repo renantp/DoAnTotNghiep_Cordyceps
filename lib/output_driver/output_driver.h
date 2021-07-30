@@ -59,7 +59,7 @@ protected:
 
 private:
     /* data */
-    void OutPutThresholdDrive(st_output_config_t &output_config, uint8_t *output_state, uint8_t output_pin);
+    void OutPutThresholdDrive(st_output_config_t &output_config, bool *output_state, bool *pre_output_state, uint8_t output_pin);
     void CheckCurrent(st_output_config_t &output_config);
     void UpdateDate(void);
     FIRFilter_t fir;
@@ -78,7 +78,7 @@ public:
     void outputTimePeroid(void);
 
     //Variable
-    uint8_t output[5], button[4];
+    bool button[4];
     float current;
     int current_total;
 };

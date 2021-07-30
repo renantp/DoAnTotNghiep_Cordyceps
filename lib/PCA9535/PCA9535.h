@@ -58,6 +58,7 @@ public:
 #if defined(ESP8266) || defined(ESP32)
     bool begin(const uint8_t address, uint8_t dataPin, uint8_t clockPin);
 #endif
+    bool begin(void);
     bool begin(const uint8_t address);
     bool begin(const uint8_t address, TwoWire *wire);
 

@@ -103,7 +103,7 @@ class LCD_UI
 {
 public:
     LCD_UI();
-    void begin(uint8_t *button, sht_31_t *sht_val, ui_setting_t *setting_val);
+    void begin(bool *button, sht_31_t *sht_val, ui_setting_t *setting_val);
 
     //PAGES
 
@@ -186,7 +186,7 @@ private:
     void st_factor_onchange(uint8_t *scroll_p);
     void st_output_logic();
     void st_output_onchange_handle(uint8_t scroll_num);
-    void output_setting_detail_onchange_logic(uint8_t scroll_num, st_output_config_t *out);
+    void output_setting_detail_onchange_logic(uint8_t scroll_num, st_output_config_t *out, bool *_output_state);
     void output_setting_onchange_logic(uint8_t scroll_num);
     void output_setting_detail_page(st_output_config_t *out, const char *tilte);
     void st_view_logic();
@@ -240,7 +240,7 @@ private:
     void selectThresholdOutput(st_output_config_t *this_output);
 
     uint8_t c_yn, c_yes, c_no, _scroll_position[10], _scroll_prev[10], _scroll_d, _scroll_u, _optional[4], _back;
-    uint8_t *bt;
+    bool *bt;
     uint8_t pre_bt[4];
     bool state_bt[4];
     uint8_t _state;
